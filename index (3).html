@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vôdbet — Postagem Telegram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Space Grotesk', sans-serif; background: #0d0d14; color: #e2e8f0; min-height: 100vh; padding: 24px 16px; }
+  .container { max-width: 600px; margin: 0 auto; }
+  .header { text-align: center; margin-bottom: 2rem; }
+  .logo { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 1px; }
+  .logo span { color: #00e676; }
+  .sub { font-size: 13px; color: #666; margin-top: 4px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .tab { padding: 8px 16px; border-radius: 8px; border: 1px solid #222; background: #111; font-size: 14px; color: #888; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .tab.active { border-color: #00e676; background: #001a0d; color: #00e676; font-weight: 500; }
+  .sec { display: none; }
+  .sec.active { display: block; }
+  .field { margin-bottom: 1rem; }
+  label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+  input[type=text], select, textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #222; background: #111; color: #e2e8f0; font-family: inherit; font-size: 14px; outline: none; transition: border 0.15s; }
+  input[type=text]:focus, select:focus, textarea:focus { border-color: #00e676; }
+  textarea { resize: vertical; min-height: 80px; }
+  select option { background: #111; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .chip { padding: 5px 12px; border-radius: 20px; border: 1px solid #222; font-size: 13px; color: #888; cursor: pointer; background: #111; font-family: inherit; transition: all 0.15s; }
+  .chip.sel { background: #001a0d; color: #00e676; border-color: #00e676; }
+  .btn-gen { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #00e676; color: #000; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; font-family: inherit; transition: opacity 0.15s; }
+  .btn-gen:hover { opacity: 0.88; }
+  .preview-box { margin-top: 1.25rem; background: #111; border-radius: 12px; border: 1px solid #222; padding: 1rem 1.25rem; }
+  .preview-label { font-size: 12px; color: #666; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 0.5px; }
+  .preview-text { font-size: 14px; color: #e2e8f0; line-height: 1.7; white-space: pre-wrap; min-height: 60px; }
+  .btn-post { width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #00e676; background: transparent; color: #00e676; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px; font-family: inherit; transition: all 0.15s; display: none; }
+  .btn-post:hover { background: #001a0d; }
+  .status { margin-top: 10px; font-size: 13px; padding: 10px 14px; border-radius: 8px; display: none; }
+  .status.ok { background: #001a0d; color: #00e676; border: 1px solid #00e67633; }
+  .status.err { background: #1a0000; color: #ff5252; border: 1px solid #ff525233; }
+  .copy-btn { font-size: 12px; color: #00e676; cursor: pointer; background: none; border: none; font-family: inherit; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #333; border-top-color: #00e676; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .tip { font-size: 12px; color: #555; margin-top: 1.5rem; padding: 10px 14px; background: #111; border-radius: 8px; border-left: 2px solid #00e676; line-height: 1.6; }
+  @media (max-width: 480px) { .row2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">VÔD<span>BET</span></div>
+    <div class="sub">Postagem automática no canal @vodebet</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="sw('pick')">⚽ Pick</button>
+    <button class="tab" onclick="sw('edu')">📚 Educativo</button>
+    <button class="tab" onclick="sw('result')">🏆 Resultado</button>
+    <button class="tab" onclick="sw('livre')">✏️ Livre</button>
+    <button class="tab" onclick="sw('carrossel')">📱 Carrossel</button>
+    <button class="tab" onclick="sw('agenda')">📋 Agenda</button>
+    <button class="tab" onclick="sw('resumo')">📊 Resumo</button>
+  </div>
+
+  <!-- PICK -->
+  <div class="sec active" id="sec-pick">
+    <div class="row2">
+      <div class="field"><label>Time da casa</label><input type="text" id="p-casa" placeholder="Ex: Flamengo" /></div>
+      <div class="field"><label>Time visitante</label><input type="text" id="p-visit" placeholder="Ex: Palmeiras" /></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Competição</label><input type="text" id="p-comp" placeholder="Ex: Brasileirão" /></div>
+      <div class="field"><label>Horário</label><input type="text" id="p-hora" placeholder="Ex: 20:00" /></div>
+    </div>
+    <div class="field">
+      <label>Mercado</label>
+      <div class="chips" id="chips-pick">
+        <button class="chip sel" onclick="selChip(this,'chips-pick')">Lay 0x1</button>
+        <button class="chip" onclick="selChip(this,'chips-pick')">Over 2.5</button>
+        <button class="chip" onclick="selChip(this,'chips-pick')">Ambas marcam</button>
+        <button class="chip" onclick="selChip(this,'chips-pick')">Asian Handicap</button>
+        <button class="chip" onclick="selChip(this,'chips-pick')">Back vencedor</button>
+      </div>
+    </div>
+    <div class="field"><label>Justificativa rápida (opcional)</label><textarea id="p-just" placeholder="Ex: Time jogando em casa, grande favorito..."></textarea></div>
+    <button class="btn-gen" onclick="gerar('pick')">Gerar mensagem →</button>
+    <div id="prev-pick" class="preview-box" style="display:none">
+      <div class="preview-label">Prévia <button class="copy-btn" onclick="copiar('prev-pick-text')">📋 copiar</button></div>
+      <div class="preview-text" id="prev-pick-text"></div>
+      <button class="btn-post" id="post-pick" onclick="postar('pick')">📲 Publicar no canal @vodebet</button>
+      <div class="status" id="st-pick"></div>
+    </div>
+  </div>
+
+  <!-- EDUCATIVO -->
+  <div class="sec" id="sec-edu">
+    <div class="field">
+      <label>Tema</label>
+      <div class="chips" id="chips-edu">
+        <button class="chip sel" onclick="selChip(this,'chips-edu')">Gestão de banca</button>
+        <button class="chip" onclick="selChip(this,'chips-edu')">O que é Lay</button>
+        <button class="chip" onclick="selChip(this,'chips-edu')">Value bet</button>
+        <button class="chip" onclick="selChip(this,'chips-edu')">Odds e probabilidade</button>
+        <button class="chip" onclick="selChip(this,'chips-edu')">Erros comuns</button>
+        <button class="chip" onclick="selChip(this,'chips-edu')">Psicologia do trader</button>
+      </div>
+    </div>
+    <div class="field"><label>Detalhes extras (opcional)</label><textarea id="edu-detalhe" placeholder="Algum ponto específico que quer abordar..."></textarea></div>
+    <button class="btn-gen" onclick="gerar('edu')">Gerar mensagem →</button>
+    <div id="prev-edu" class="preview-box" style="display:none">
+      <div class="preview-label">Prévia <button class="copy-btn" onclick="copiar('prev-edu-text')">📋 copiar</button></div>
+      <div class="preview-text" id="prev-edu-text"></div>
+      <button class="btn-post" id="post-edu" onclick="postar('edu')">📲 Publicar no canal @vodebet</button>
+      <div class="status" id="st-edu"></div>
+    </div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="sec" id="sec-result">
+    <div class="row2">
+      <div class="field"><label>Jogo</label><input type="text" id="r-jogo" placeholder="Ex: Flamengo x Palmeiras" /></div>
+      <div class="field"><label>Placar final</label><input type="text" id="r-placar" placeholder="Ex: 2x0" /></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Mercado jogado</label><input type="text" id="r-mercado" placeholder="Ex: Lay 0x1" /></div>
+      <div class="field"><label>Resultado</label>
+        <select id="r-result">
+          <option>Green ✅</option>
+          <option>Red ❌</option>
+          <option>Void / devolvido</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Comentário (opcional)</label><textarea id="r-coment" placeholder="Ex: Jogo controlado, placar esperado..."></textarea></div>
+    <button class="btn-gen" onclick="gerar('result')">Gerar mensagem →</button>
+    <div id="prev-result" class="preview-box" style="display:none">
+      <div class="preview-label">Prévia <button class="copy-btn" onclick="copiar('prev-result-text')">📋 copiar</button></div>
+      <div class="preview-text" id="prev-result-text"></div>
+      <button class="btn-post" id="post-result" onclick="postar('result')">📲 Publicar no canal @vodebet</button>
+      <div class="status" id="st-result"></div>
+    </div>
+  </div>
+
+  <!-- LIVRE -->
+  <div class="sec" id="sec-livre">
+    <div class="field"><label>Descreva o que quer postar</label><textarea id="livre-tema" placeholder="Ex: Aviso de novidades, mensagem motivacional, dica rápida..."></textarea></div>
+    <button class="btn-gen" onclick="gerar('livre')">Gerar mensagem →</button>
+    <div id="prev-livre" class="preview-box" style="display:none">
+      <div class="preview-label">Prévia <button class="copy-btn" onclick="copiar('prev-livre-text')">📋 copiar</button></div>
+      <div class="preview-text" id="prev-livre-text"></div>
+      <button class="btn-post" id="post-livre" onclick="postar('livre')">📲 Publicar no canal @vodebet</button>
+      <div class="status" id="st-livre"></div>
+    </div>
+  </div>
+
+  <!-- CARROSSEL -->
+  <div class="sec" id="sec-carrossel">
+    <div class="field">
+      <label>Tema do carrossel</label>
+      <div class="chips" id="chips-carr">
+        <button class="chip sel" onclick="selChip(this,'chips-carr')">O que é Lay</button>
+        <button class="chip" onclick="selChip(this,'chips-carr')">Gestão de banca</button>
+        <button class="chip" onclick="selChip(this,'chips-carr')">Como entrar num jogo</button>
+        <button class="chip" onclick="selChip(this,'chips-carr')">Erros comuns</button>
+        <button class="chip" onclick="selChip(this,'chips-carr')">Value bet</button>
+        <button class="chip" onclick="selChip(this,'chips-carr')">Psicologia do trader</button>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Nº de slides</label>
+        <select id="carr-slides">
+          <option>5 slides</option>
+          <option>7 slides</option>
+          <option>10 slides</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Público alvo</label>
+        <select id="carr-publico">
+          <option>Iniciante</option>
+          <option>Intermediário</option>
+          <option>Avançado</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Detalhes extras (opcional)</label><textarea id="carr-detalhe" placeholder="Algum ponto específico que quer abordar..."></textarea></div>
+    <button class="btn-gen" onclick="gerar('carrossel')">Gerar carrossel →</button>
+    <div id="prev-carrossel" class="preview-box" style="display:none">
+      <div class="preview-label">Slides gerados <button class="copy-btn" onclick="copiar('prev-carrossel-text')">📋 copiar tudo</button></div>
+      <div class="preview-text" id="prev-carrossel-text"></div>
+      <div style="margin-top:10px; padding:10px; background:#001a0d; border-radius:8px; border:1px solid #00e67633; font-size:12px; color:#00e676;">
+        💡 Cole cada slide no Canva usando os templates de carrossel. Use as cores da sua marca!
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENDA -->
+  <div class="sec" id="sec-agenda">
+    <div class="field">
+      <label>Cole a lista de jogos do dia</label>
+      <textarea id="agenda-jogos" style="min-height:140px" placeholder="Ex:&#10;Flamengo x Vasco - 16:00&#10;Palmeiras x Santos - 18:30&#10;Corinthians x São Paulo - 21:00"></textarea>
+    </div>
+    <div class="field">
+      <label>Mercado principal</label>
+      <div class="chips" id="chips-agenda">
+        <button class="chip sel" onclick="selChip(this,'chips-agenda')">Lay 0x1</button>
+        <button class="chip" onclick="selChip(this,'chips-agenda')">Over 2.5</button>
+        <button class="chip" onclick="selChip(this,'chips-agenda')">Ambas marcam</button>
+        <button class="chip" onclick="selChip(this,'chips-agenda')">Misto</button>
+      </div>
+    </div>
+    <div class="field"><label>Observação extra (opcional)</label><textarea id="agenda-obs" placeholder="Ex: Foco nos jogos da tarde, evitar jogos com chuva..."></textarea></div>
+    <button class="btn-gen" onclick="gerar('agenda')">Gerar agenda →</button>
+    <div id="prev-agenda" class="preview-box" style="display:none">
+      <div class="preview-label">Agenda gerada <button class="copy-btn" onclick="copiar('prev-agenda-text')">📋 copiar</button></div>
+      <div class="preview-text" id="prev-agenda-text"></div>
+      <button class="btn-post" id="post-agenda" onclick="postar('agenda')">📲 Publicar no canal @vodebet</button>
+      <div class="status" id="st-agenda"></div>
+    </div>
+  </div>
+
+  <!-- RESUMO SEMANAL -->
+  <div class="sec" id="sec-resumo">
+    <div class="field">
+      <label>Cole os resultados da semana</label>
+      <textarea id="resumo-resultados" style="min-height:140px" placeholder="Ex:&#10;Segunda - Flamengo x Vasco - Lay 0x1 - GREEN&#10;Terça - Palmeiras x Santos - Over 2.5 - RED&#10;Quarta - Corinthians x São Paulo - Lay 0x1 - GREEN"></textarea>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Total de greens</label><input type="text" id="resumo-green" placeholder="Ex: 4" /></div>
+      <div class="field"><label>Total de reds</label><input type="text" id="resumo-red" placeholder="Ex: 2" /></div>
+    </div>
+    <div class="field"><label>Observação (opcional)</label><textarea id="resumo-obs" placeholder="Ex: Semana difícil com muitos jogos imprevisíveis..."></textarea></div>
+    <button class="btn-gen" onclick="gerar('resumo')">Gerar resumo →</button>
+    <div id="prev-resumo" class="preview-box" style="display:none">
+      <div class="preview-label">Resumo gerado <button class="copy-btn" onclick="copiar('prev-resumo-text')">📋 copiar</button></div>
+      <div class="preview-text" id="prev-resumo-text"></div>
+      <button class="btn-post" id="post-resumo" onclick="postar('resumo')">📲 Publicar no canal @vodebet</button>
+      <div class="status" id="st-resumo"></div>
+    </div>
+  </div>
+
+  <div class="tip">⚡ Este painel usa IA para gerar o conteúdo e publica direto no canal @vodebet via bot @vodbet_conteudo_bot.</div>
+</div>
+
+<script>
+const BOT_TOKEN = '8929688445:AAF3nMw_FRIP6u_1ZgXDbSZqFu5eXsU4NHs';
+const CHAT_ID = '-1003089576515';
+
+function sw(t) {
+  const ids = ['pick','edu','result','livre','carrossel','agenda','resumo'];
+  ids.forEach((id, i) => {
+    document.getElementById('sec-'+id).classList.toggle('active', id===t);
+    document.querySelectorAll('.tab')[i].classList.toggle('active', id===t);
+  });
+}
+
+function selChip(el, group) {
+  document.querySelectorAll('#'+group+' .chip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function getChip(group) {
+  const s = document.querySelector('#'+group+' .chip.sel');
+  return s ? s.textContent.trim() : '';
+}
+
+function v(id) { return (document.getElementById(id)||{}).value || ''; }
+
+async function gerar(tipo) {
+  let prompt = '';
+  const textEl = document.getElementById('prev-'+tipo+'-text');
+  const prevBox = document.getElementById('prev-'+tipo);
+  const postBtn = document.getElementById('post-'+tipo);
+
+  if (tipo === 'pick') {
+    const casa = v('p-casa') || 'Time A', visit = v('p-visit') || 'Time B';
+    const comp = v('p-comp') || 'Competição', hora = v('p-hora');
+    const mercado = getChip('chips-pick'), just = v('p-just');
+    prompt = `Crie uma mensagem para canal do Telegram de trader esportivo anunciando um pick. Jogo: ${casa} x ${visit} - ${comp}${hora?' às '+hora:''}. Mercado: ${mercado}. ${just?'Justificativa: '+just:''} Use emojis moderados, tom descontraído e próximo. Inclua CTA para ativar notificações. Máximo 200 palavras.`;
+  } else if (tipo === 'edu') {
+    const tema = getChip('chips-edu'), detalhe = v('edu-detalhe');
+    prompt = `Crie uma mensagem educativa para canal do Telegram de trader esportivo sobre: ${tema}. ${detalhe?'Detalhes: '+detalhe:''} Tom descontraído, didático. Use emojis com moderação. Termine com pergunta para engajar. IMPORTANTE: não cite times específicos como exemplo, use termos genéricos como "Time A" ou "o favorito". Máximo 200 palavras.`;
+  } else if (tipo === 'result') {
+    const jogo = v('r-jogo'), placar = v('r-placar'), mercado = v('r-mercado');
+    const result = v('r-result'), coment = v('r-coment');
+    prompt = `Crie mensagem de resultado para canal Telegram de trader esportivo. Jogo: ${jogo}${placar?' - Placar: '+placar:''}. Mercado: ${mercado}. Resultado: ${result}. ${coment?'Comentário: '+coment:''} Tom honesto e transparente. Use emojis. Máximo 150 palavras.`;
+  } else if (tipo === 'carrossel') {
+    const tema = getChip('chips-carr');
+    const slides = v('carr-slides').replace(' slides','');
+    const publico = v('carr-publico');
+    const detalhe = v('carr-detalhe');
+    prompt = `Crie um carrossel de Instagram para trader esportivo sobre: "${tema}". Público: ${publico}. Número de slides: ${slides}. ${detalhe?'Detalhes: '+detalhe:''} 
+
+Formato obrigatório para cada slide:
+📌 SLIDE 1 — [título chamativo]
+[texto curto e direto, máximo 2 linhas]
+
+📌 SLIDE 2 — [subtítulo]
+[texto curto]
+
+E assim por diante até o slide ${slides}.
+
+O último slide deve ter CTA para seguir @vodebet e ativar notificações.
+Tom descontraído, use emojis com moderação. Cada slide deve ter no máximo 2-3 linhas para caber no visual.`;
+  } else if (tipo === 'agenda') {
+    const jogos = v('agenda-jogos') || 'jogos do dia';
+    const mercado = getChip('chips-agenda');
+    const obs = v('agenda-obs');
+    prompt = `Crie uma mensagem para canal do Telegram de trader esportivo com a agenda de jogos do dia para o mercado ${mercado}. Lista de jogos: ${jogos}. ${obs?'Observação: '+obs:''} Formate de forma clara e bonita com emojis, horários e destaque para cada jogo. Inclua CTA para ativar notificações. Tom animado e profissional. Máximo 250 palavras.`;
+  } else if (tipo === 'resumo') {
+    const resultados = v('resumo-resultados') || 'resultados da semana';
+    const green = v('resumo-green') || '0';
+    const red = v('resumo-red') || '0';
+    const obs = v('resumo-obs');
+    prompt = `Crie um resumo semanal para canal do Telegram de trader esportivo. Resultados: ${resultados}. Total: ${green} greens e ${red} reds. ${obs?'Observação: '+obs:''} Seja transparente e honesto. Se foi boa semana, celebre com moderação. Se foi ruim, seja motivador e mostre o que aprendeu. Use emojis, tom profissional e próximo. Inclua CTA para continuar acompanhando. Máximo 250 palavras.`;
+  } else {
+    const tema = v('livre-tema') || 'conteúdo geral';
+    prompt = `Crie mensagem para canal Telegram de trader esportivo sobre: ${tema}. Tom descontraído, use emojis moderados. Máximo 150 palavras.`;
+  }
+
+  prevBox.style.display = 'block';
+  textEl.innerHTML = '<span class="spinner"></span>Gerando...';
+  postBtn.style.display = 'none';
+  document.getElementById('st-'+tipo).style.display = 'none';
+
+  try {
+    const res = await fetch('/api/gerar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    textEl.style.color = '#e2e8f0';
+    textEl.textContent = data.text || 'Erro ao gerar.';
+    postBtn.style.display = 'block';
+  } catch(e) {
+    textEl.textContent = 'Erro: ' + e.message;
+  }
+}
+
+async function postar(tipo) {
+  const text = document.getElementById('prev-'+tipo+'-text').textContent;
+  const stEl = document.getElementById('st-'+tipo);
+  const postBtn = document.getElementById('post-'+tipo);
+  postBtn.disabled = true;
+  postBtn.textContent = '⏳ Publicando...';
+  stEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CHAT_ID, text })
+    });
+    const data = await res.json();
+    stEl.className = data.ok ? 'status ok' : 'status err';
+    stEl.textContent = data.ok ? '✅ Publicado com sucesso no @vodebet!' : '❌ Erro: ' + (data.description || 'Verifique se o bot é admin.');
+  } catch(e) {
+    stEl.className = 'status err';
+    stEl.textContent = '❌ Erro de conexão.';
+  }
+  stEl.style.display = 'block';
+  postBtn.disabled = false;
+  postBtn.textContent = '📲 Publicar no canal @vodebet';
+}
+
+function copiar(id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).catch(()=>{});
+}
+</script>
+</body>
+</html>
