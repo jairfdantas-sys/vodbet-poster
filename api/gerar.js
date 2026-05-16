@@ -6,23 +6,28 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { prompt } = req.body;
+  try {
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { prompt } = body;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': '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',
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': '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',
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
 
-  const data = await response.json();
-  const text = data.content?.map(b => b.text || '').join('') || 'Erro ao gerar.';
-  res.status(200).json({ text });
+    const data = await response.json();
+    const text = data.content?.map(b => b.text || '').join('') || 'Erro ao gerar.';
+    res.status(200).json({ text });
+  } catch(e) {
+    res.status(500).json({ text: 'Erro: ' + e.message });
+  }
 }
