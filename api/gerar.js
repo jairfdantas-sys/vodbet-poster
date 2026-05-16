@@ -2,19 +2,16 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { prompt } = body;
-
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': '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',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
@@ -23,7 +20,6 @@ export default async function handler(req, res) {
         messages: [{ role: 'user', content: prompt }]
       })
     });
-
     const data = await response.json();
     const text = data.content?.map(b => b.text || '').join('') || 'Erro ao gerar.';
     res.status(200).json({ text });
